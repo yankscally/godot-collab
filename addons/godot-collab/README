@@ -1,0 +1,5 @@
+Networking works, its abit of a mess , needs cleaning up and optimizing
+
+data for open files sends but the recievers script editor doesnt currently update with the new data
+
+NOTE:  data only updates when the user types a valid line, the script editor seems to emit a signal upon validation, so char by char updates arent done here.
