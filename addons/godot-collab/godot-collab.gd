@@ -43,10 +43,11 @@ func _process(delta):
 		# we have to poll it manually
 		if network.is_loaded == false:
 			network.connected_users = {}
-			network.connected_users["1"] = {
-				"name": username,
-				"Colour": colour
-			}
+			if is_server == true:
+				network.connected_users["1"] = {
+					"name": username,
+					"Colour": colour
+				}
 			network._load(ip,port,is_server,self)
 		network.mpapi.poll()
 		
