@@ -31,7 +31,7 @@ func update_script(input):
 #### heart beats    Both these functions are to check clients latency in milliseconds
 @rpc("any_peer", "reliable")
 func repeater():
-	print("-")
+	push_warning("heartbeat")
 	var id = collab_tool.network.mpapi.get_remote_sender_id()
 	if id == 1:
 		collab_tool.network.mpapi.rpc(1, self, "catcher")
@@ -40,8 +40,8 @@ func catcher():
 	var id = collab_tool.network.mpapi.get_remote_sender_id()
 	var users = collab_tool.network.connected_users
 	if str(id) in users:
-		users[str(id)]["latency"] = Time.get_ticks_msec() - users[str(id)]["beat"]
-		print(str(id), "  Latency: ", users[str(id)]["latency"], "ms")
+		users[str(id)]["latency"] = float(Time.get_ticks_msec() - users[str(id)]["beat"])/2
+		push_warning(str(id), "  Latency: ", users[str(id)]["latency"], "ms")
 #########################################################################################
 
 #request users info to set name / colour

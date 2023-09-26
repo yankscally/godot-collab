@@ -22,7 +22,8 @@ func editor_script_changed(script):
 	## triggered when user changes/opens script
 	script_list[str(script.resource_path)] = script
 	script_base = editor.get_current_editor()
-	script_base.connect("name_changed", update_script)
+	if script_base.is_connected("name_changed", update_script) == false:
+		script_base.connect("name_changed", update_script)
 
 func update_script():
 	#triggers on script change and validation attempt
