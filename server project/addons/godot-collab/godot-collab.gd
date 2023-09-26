@@ -1,12 +1,9 @@
 @tool
 extends EditorPlugin
 var started = false
-var dock = preload("res://addons/godot-collab/godot_collab_ui.tscn").instantiate()
-var editor = preload("res://addons/godot-collab/EditorSync.gd").new()
-var server = preload("res://addons/godot-collab/Server.gd").new()
-var client = preload("res://addons/godot-collab/Client.gd").new()
-var data_send = preload("res://addons/godot-collab/send_rpc.gd").new()
-var mpapi = MultiplayerAPI.create_default_interface()
+var dock = preload("res://addons/godot-collab/Dock/godot_collab_ui.tscn").instantiate()
+var editor = preload("res://addons/godot-collab/ScriptEditor/EditorSync.gd").new()
+var network = preload("res://addons/godot-collab/Network.gd").new()
 var is_server = false
 var ip = "127.0.0.1"
 var port = 10567
@@ -15,12 +12,10 @@ var username = "default"
 func _ready():
 	add_control_to_dock(DOCK_SLOT_LEFT_UR, dock)
 	dock.colab_tool = self
-	editor.send = data_send
-	client.editor = editor
-	data_send.main = self
-	data_send.mpapi = mpapi
+	editor.colab_tool = self
 
 func dock_start(_server,_ip,_port,_user,_started):
+	## function is called from the dock UI 
 	if _started == true:
 		if _server != false:
 			if _ip != "":
@@ -31,33 +26,23 @@ func dock_start(_server,_ip,_port,_user,_started):
 		if _user != "":
 			username = _user
 		started = true
-		
 	else:
 		stop_running()
 		
 func stop_running():
 	started = false
-	server.is_loaded = false
-	server.mpapi = null
-	server.host = null
-	client.is_loaded = false
-	client.mpapi = null
-	client.client = null
+	network.is_loaded = false
+	network.mpapi = null
+	network.host = null
 
 func _process(delta):
+	## the dock ui toggles started
 	if started == true:
-		if is_server == true:
-			if server.is_loaded == false:
-				server.mpapi = mpapi
-				server._load(port)
-			mpapi.poll()
-			#if len(server.mpapi.get_peers()) > 0:
-			editor.script_loop()
-		else:
-			if client.is_loaded == false:
-				client.mpapi = mpapi
-				client._load(ip,port)
-			mpapi.poll()
-			if client.status == 2:
-				editor.script_loop()
-
+		## process the network
+		# we have to poll it manually
+		if network.is_loaded == false:
+			network._load(ip,port,is_server,self)
+		network.mpapi.poll()
+		
+		## process events 
+		editor.script_loop()

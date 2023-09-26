@@ -1,0 +1,67 @@
+[gd_scene load_steps=2 format=3 uid="uid://dsdu5dmc2fco4"]
+
+[ext_resource type="Script" path="res://addons/godot-collab/Dock/godot_collab_ui.gd" id="1_huwy1"]
+
+[node name="godot-collab-ui" type="VBoxContainer"]
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 138.0
+grow_vertical = 2
+script = ExtResource("1_huwy1")
+
+[node name="server_label" type="Label" parent="."]
+layout_mode = 2
+size_flags_vertical = 1
+text = "server:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="server" type="CheckBox" parent="."]
+layout_mode = 2
+
+[node name="user" type="Label" parent="."]
+layout_mode = 2
+size_flags_vertical = 1
+text = "User"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="useri" type="TextEdit" parent="."]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ip_label" type="Label" parent="."]
+layout_mode = 2
+size_flags_vertical = 1
+text = "ip:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ip_address" type="TextEdit" parent="."]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="port_label" type="Label" parent="."]
+layout_mode = 2
+size_flags_vertical = 1
+text = "port"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="port" type="TextEdit" parent="."]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="start" type="Button" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "start"
+
+[connection signal="toggled" from="server" to="." method="_on_server_toggled"]
+[connection signal="text_changed" from="useri" to="." method="_on_useri_text_changed"]
+[connection signal="text_changed" from="ip_address" to="." method="_on_ip_address_text_changed"]
+[connection signal="text_changed" from="port" to="." method="_on_port_text_changed"]
+[connection signal="pressed" from="start" to="." method="_on_start_pressed"]

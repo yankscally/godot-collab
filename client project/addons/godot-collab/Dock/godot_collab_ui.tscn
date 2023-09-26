@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dsdu5dmc2fco4"]
 
-[ext_resource type="Script" path="res://addons/godot-collab/godot_collab_ui.gd" id="1_huwy1"]
+[ext_resource type="Script" path="res://addons/godot-collab/Dock/godot_collab_ui.gd" id="1_huwy1"]
 
 [node name="godot-collab-ui" type="VBoxContainer"]
 anchors_preset = 9
