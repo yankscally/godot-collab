@@ -42,6 +42,7 @@ func _process(delta):
 		## process the network
 		# we have to poll it manually
 		if network.is_loaded == false:
+			network.connected_users = {}
 			network.connected_users["1"] = {
 				"name": username,
 				"Colour": colour
@@ -51,3 +52,4 @@ func _process(delta):
 		
 		## process events 
 		editor.script_loop()
+		print(network.connected_users)

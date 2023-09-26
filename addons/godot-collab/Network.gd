@@ -43,7 +43,6 @@ func _load(ip,port,is_server,tool):
 		mpapi.peer_disconnected.connect(_editor_disconnected)
 		create_server()
 	add_node(tool)
-	connected_users = {}
 	if node != null and is_server == true:
 		var beat = node.get_node_or_null("HeartBeat")
 		if beat != null:
