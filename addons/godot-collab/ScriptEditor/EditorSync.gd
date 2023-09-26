@@ -1,25 +1,30 @@
 extends EditorPlugin
 var userscript = null
 var colab_tool = null
-
+var editor = null
 var script_list = {}
+var script_base = null
 
-func save_and_set_script():
-	userscript = get_editor_interface().get_script_editor().get_current_script()
-	script_list[str(userscript.resource_path)] = userscript
-	
 func script_loop():
-	save_and_set_script()
-	if script_list == null:
+	if editor == null:
 		script_list = {}
-	if script_list != {}:
-		send_list(script_list)
+		editor = get_editor_interface().get_script_editor()
+		editor.connect("editor_script_changed", editor_script_changed)
 
 func send_list(script_list):
 	var list = {}
 	for each in script_list:
 		list[each] = script_list[each].source_code
+#	for each in colab_tool.network.mpapi.get_peers():
+#		colab_tool.network.mpapi.rpc(each, colab_tool.network.node, "get_scriptlist", [list])
 
-	for each in colab_tool.network.mpapi.get_peers():
-		colab_tool.network.mpapi.rpc(each, colab_tool.network.node, "get_scriptlist", [list])
+func editor_script_changed(script):
+	## triggered when user changes/opens script
+	script_list[str(script.resource_path)] = script
+	script_base = editor.get_current_editor()
+	script_base.connect("name_changed", update_script)
 
+func update_script():
+	#triggers on script change and validation attempt
+	print("ok")
+	pass

@@ -7,7 +7,7 @@ var port = ""
 var colab_tool = null
 var server = false
 var started = false
-
+var colour = ""
 func _on_ip_address_text_changed():
 	ip = $ip_address.text
 
@@ -32,7 +32,7 @@ func _on_start_pressed():
 			child.visible = false
 		$start.text = "Stop"
 	$start.visible = true
-	colab_tool.dock_start(server,ip,port,user,started)
+	colab_tool.dock_start(server,ip,port,user,colour,started)
 
 
 func _on_port_text_changed():
