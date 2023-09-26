@@ -11,6 +11,7 @@ var host = null
 var node = null
 var connected_users = {}
 var timer
+var lat = 0
 ## custom mp api node root fix
 func add_node(tool):
 	if node != null:
@@ -119,7 +120,10 @@ func heartbeat():
 				connected_users[user]["beat"] = Time.get_ticks_msec()
 				if connected_users[user]["name"] == "Unknown":
 					mpapi.rpc(int(user), node, "request_user_info")
-				mpapi.rpc(int(user), node, "repeater")
+				if "latency" in connected_users[user]:
+					mpapi.rpc(int(user), node, "repeater", [connected_users[user]["latency"]])
+				else:
+					mpapi.rpc(int(user), node, "repeater", [-1])
 	if timer.is_stopped() == true:
 		timer.start()
 	elif timer.is_paused() == true:

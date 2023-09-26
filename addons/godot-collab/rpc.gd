@@ -7,34 +7,59 @@ var script_source
 
 
 func _ready():
-	var editor = EditorPlugin.new()
-	script_editor = editor.get_editor_interface().get_script_editor().get_current_editor().get_base_editor()
-	#script_editor.connect("text_changed", update_script)
 	collab_tool = get_meta("tool")
+#	var editor = EditorPlugin.new()
+#	script_editor = editor.get_editor_interface().get_script_editor().get_current_editor().get_base_editor()
+#	#script_editor.connect("text_changed", update_script)
+#	
+#
+#@rpc("any_peer", "unreliable")
+#func get_scriptlist(scriptlist):
+#	for each in scriptlist:
+#		if not "addons" in each:
+#			if not each in collab_tool.editor.script_list:
+#				collab_tool.editor.script_list[each] = load(each)
+#			collab_tool.editor.script_list[each].source_code = scriptlist[each]
+#
+#			script_source = scriptlist[each]
+#			update_script(script_source)
+#
+#func update_script(input):
+#		script_editor.set("text", input)
 
+
+## updates source code of scripts based on last edit time 
+## using current run time... and latency in the case of users
 @rpc("any_peer", "unreliable")
-func get_scriptlist(scriptlist):
-	for each in scriptlist:
-		if not "addons" in each:
-			if not each in collab_tool.editor.script_list:
-				collab_tool.editor.script_list[each] = load(each)
-			collab_tool.editor.script_list[each].source_code = scriptlist[each]
-			
-			script_source = scriptlist[each]
-			update_script(script_source)
-
-func update_script(input):
-		script_editor.set("text", input)
-
-
+func Script_updated(path, code, time):
+	print(path)
+	var id = collab_tool.network.mpapi.get_remote_sender_id()
+	if not "addons" in path:
+		if path in collab_tool.editor.script_list:
+			if not "last" in collab_tool.editor.script_list:
+					var script = load(str(path))
+					if script == null:
+						script = GDScript.new()
+					collab_tool.editor.script_list = {"obj": script, "last": 0}
+			if collab_tool.network.mpapi.is_server() == true:
+				if int(collab_tool.editor.script_list["last"]) < Time.get_ticks_msec() - collab_tool.network.connected_users[str(id)]["latency"]:
+					collab_tool.editor.script_list["obj"].source_code = code
+					collab_tool.editor.script_list["last"] = Time.get_ticks_msec()
+			else:
+				if int(collab_tool.editor.script_list["last"]) < collab_tool.network.lat:
+					collab_tool.editor.script_list["obj"].source_code = code
+					collab_tool.editor.script_list["last"] = time
 
 #### heart beats    Both these functions are to check clients latency in milliseconds
+## network.lat trys to keep server time to match with files
 @rpc("any_peer", "reliable")
-func repeater():
+func repeater(_lat):
 	push_warning("heartbeat")
 	var id = collab_tool.network.mpapi.get_remote_sender_id()
 	if id == 1:
 		collab_tool.network.mpapi.rpc(1, self, "catcher")
+		if int(_lat) != -1:
+			collab_tool.network.lat = Time.get_ticks_msec() - float(_lat)
 @rpc("any_peer", "reliable")
 func catcher():
 	var id = collab_tool.network.mpapi.get_remote_sender_id()
@@ -60,7 +85,9 @@ func provided_user_data(_name, _colour):
 		users[str(id)]["name"] = _name
 		users[str(id)]["Colour"] = _colour
 		print(users)
-################
+		
+		
+################ role call
 
 @rpc("any_peer", "reliable")
 func announce_new_editor(user):
