@@ -93,6 +93,7 @@ func create_server():
 func _editor_connected(id):
 	print("Editor Connected: " + str(id))
 	connected_users[str(id)] = {
+		"id": str(id),
 		"name": "Unknown",
 		"Colour": "",
 	}
@@ -100,21 +101,25 @@ func _editor_connected(id):
 		timer.start()
 	elif timer.is_paused() == true:
 		timer.set_paused(false)
+	mpapi.rpc(0, node, "provide_all_editors", [connected_users])
+	mpapi.rpc(0, node, "announce_new_editor", [connected_users[str(id)]])
 
 func _editor_disconnected(id):
 	print("Editor Disconnected "  + str(id))
 	connected_users.erase(str(id))
-	if len(connected_users) <= 0:
+	if len(connected_users) <= 1:
 		timer.set_paused(true)
 		print("timer paused")
+	mpapi.rpc(0, node, "announce_editor_gone", [str(id)])
 
 func heartbeat():
-	if len(connected_users) > 0:
+	if len(connected_users) > 1:
 		for user in connected_users:
-			connected_users[user]["beat"] = Time.get_ticks_msec()
-			if connected_users[user]["name"] == "Unknown":
-				mpapi.rpc(int(user), node, "request_user_info")
-			mpapi.rpc(int(user), node, "repeater")
+			if user != "1":
+				connected_users[user]["beat"] = Time.get_ticks_msec()
+				if connected_users[user]["name"] == "Unknown":
+					mpapi.rpc(int(user), node, "request_user_info")
+				mpapi.rpc(int(user), node, "repeater")
 	if timer.is_stopped() == true:
 		timer.start()
 	elif timer.is_paused() == true:

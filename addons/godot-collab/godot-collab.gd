@@ -7,7 +7,7 @@ var network = preload("res://addons/godot-collab/Network.gd").new()
 var is_server = false
 var ip = "127.0.0.1"
 var port = 10567
-var username = "Unknown"
+var username = "default"
 var colour = ""
 func _ready():
 	add_control_to_dock(DOCK_SLOT_LEFT_UR, dock)
@@ -42,6 +42,10 @@ func _process(delta):
 		## process the network
 		# we have to poll it manually
 		if network.is_loaded == false:
+			network.connected_users["1"] = {
+				"name": username,
+				"Colour": colour
+			}
 			network._load(ip,port,is_server,self)
 		network.mpapi.poll()
 		

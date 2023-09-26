@@ -60,3 +60,27 @@ func provided_user_data(_name, _colour):
 		users[str(id)]["name"] = _name
 		users[str(id)]["Colour"] = _colour
 		print(users)
+################
+
+@rpc("any_peer", "reliable")
+func announce_new_editor(user):
+	var users = collab_tool.network.connected_users
+	users[user["id"]] = user
+	print("EDITOR ARRIVED  ", users)
+
+@rpc("any_peer", "reliable")
+func announce_editor_gone(user):
+	var json = JSON.new()
+	user = json.parse(user)
+	var users = collab_tool.network.connected_users
+	for x in user:
+		if str(x) in users:
+			users.erase(x)
+			print("EDITOR GONE  ", users)
+		break
+
+@rpc("any_peer", "reliable")
+func provide_all_editors(users):
+	var json = JSON.new()
+	users = json.parse(users)
+	collab_tool.network.connected_users = users
