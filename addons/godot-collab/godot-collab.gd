@@ -8,13 +8,13 @@ var is_server = false
 var ip = "127.0.0.1"
 var port = 10567
 var username = "default"
-
+var colour = ""
 func _ready():
 	add_control_to_dock(DOCK_SLOT_LEFT_UR, dock)
 	dock.colab_tool = self
 	editor.colab_tool = self
 
-func dock_start(_server,_ip,_port,_user,_started):
+func dock_start(_server,_ip,_port,_user,_colour,_started):
 	## function is called from the dock UI 
 	if _started == true:
 		if _server != false:
@@ -25,6 +25,7 @@ func dock_start(_server,_ip,_port,_user,_started):
 			port = _port
 		if _user != "":
 			username = _user
+		colour = _colour
 		started = true
 	else:
 		stop_running()
@@ -41,8 +42,15 @@ func _process(delta):
 		## process the network
 		# we have to poll it manually
 		if network.is_loaded == false:
+			network.connected_users = {}
+			if is_server == true:
+				network.connected_users["1"] = {
+					"name": username,
+					"Colour": colour
+				}
 			network._load(ip,port,is_server,self)
 		network.mpapi.poll()
 		
 		## process events 
 		editor.script_loop()
+		print(network.connected_users)
