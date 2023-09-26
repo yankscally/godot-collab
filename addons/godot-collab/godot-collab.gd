@@ -50,4 +50,4 @@ func _process(delta):
 		network.mpapi.poll()
 		
 		## process events 
-	editor.script_loop()
+		editor.script_loop()
