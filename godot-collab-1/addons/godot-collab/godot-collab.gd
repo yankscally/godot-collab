@@ -53,4 +53,4 @@ func _process(delta):
 		
 		## process events 
 		editor.script_loop()
-		print(network.connected_users)
+		#print(network.connected_users)

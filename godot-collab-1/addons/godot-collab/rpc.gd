@@ -32,24 +32,34 @@ func _ready():
 ## using current run time... and latency in the case of users
 @rpc("any_peer", "unreliable")
 func Script_updated(path, code, time):
-	print(path)
+	#print(path)
 	var id = collab_tool.network.mpapi.get_remote_sender_id()
-	if not "addons" in path:
+	if str(path).begins_with("res://addons/godot-collab"):
+		pass
+	else:
 		if path in collab_tool.editor.script_list:
 			if not "last" in collab_tool.editor.script_list:
 					var script = load(str(path))
 					if script == null:
 						script = GDScript.new()
 					collab_tool.editor.script_list = {"obj": script, "last": 0}
+		
 			if collab_tool.network.mpapi.is_server() == true:
-				if int(collab_tool.editor.script_list["last"]) < Time.get_ticks_msec() - collab_tool.network.connected_users[str(id)]["latency"]:
-					collab_tool.editor.script_list["obj"].source_code = code
-					collab_tool.editor.script_list["last"] = Time.get_ticks_msec()
+				pass # because we are client
+#				if int(collab_tool.editor.script_list["last"]) < Time.get_ticks_msec() - collab_tool.network.connected_users[str(id)]["latency"]:
+#
+#					var current_script = EditorPlugin.new()
+#					current_script.get_editor_interface().get_script_editor().get_current_editor().get_base_editor().set_text(code)
+#					current_script.queue_free()
+#					collab_tool.editor.script_list["last"] = Time.get_ticks_msec()
+			
 			else:
 				if int(collab_tool.editor.script_list["last"]) < collab_tool.network.lat:
-					collab_tool.editor.script_list["obj"].source_code = code
+					
+					var current_script = EditorPlugin.new()
+					current_script.get_editor_interface().get_script_editor().get_current_editor().get_base_editor().set_text(code)
+					current_script.queue_free()
 					collab_tool.editor.script_list["last"] = time
-
 #### heart beats    Both these functions are to check clients latency in milliseconds
 ## network.lat trys to keep server time to match with files
 @rpc("any_peer", "reliable")
@@ -84,7 +94,7 @@ func provided_user_data(_name, _colour):
 	if str(id) in users:
 		users[str(id)]["name"] = _name
 		users[str(id)]["Colour"] = _colour
-		print(users)
+		#print(users)
 		
 		
 ################ role call
