@@ -3,7 +3,7 @@ extends EditorPlugin
 var started = false
 var dock = preload("res://addons/godot-collab/Dock/godot_collab_ui.tscn").instantiate()
 var editor = preload("res://addons/godot-collab/ScriptEditor/EditorSync.gd").new()
-var network = preload("res://addons/godot-collab/Network.gd").new()
+var network = preload("res://addons/godot-collab/Network/Network.gd").new()
 var is_server = false
 var ip = "127.0.0.1"
 var port = 10567
@@ -35,6 +35,8 @@ func stop_running():
 	network.is_loaded = false
 	network.mpapi = null
 	network.host = null
+	for user in network.user_list:
+		network.user_list[user].queue_free()
 
 func _process(delta):
 	## the dock ui toggles started
@@ -42,15 +44,7 @@ func _process(delta):
 		## process the network
 		# we have to poll it manually
 		if network.is_loaded == false:
-			network.connected_users = {}
-			if is_server == true:
-				network.connected_users["1"] = {
-					"name": username,
-					"Colour": colour
-				}
 			network._load(ip,port,is_server,self)
 		network.mpapi.poll()
-		
-		## process events 
-		editor.script_loop()
-		#print(network.connected_users)
+		editor._loop()
+

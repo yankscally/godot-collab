@@ -60,8 +60,15 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "start"
 
+[node name="HostSync" type="Button" parent="."]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Sync All Files"
+
 [connection signal="toggled" from="server" to="." method="_on_server_toggled"]
 [connection signal="text_changed" from="useri" to="." method="_on_useri_text_changed"]
 [connection signal="text_changed" from="ip_address" to="." method="_on_ip_address_text_changed"]
 [connection signal="text_changed" from="port" to="." method="_on_port_text_changed"]
 [connection signal="pressed" from="start" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="HostSync" to="." method="_on_host_sync_pressed"]

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://jagvp7x7kj5y"]
+
+[ext_resource type="Script" path="res://addons/godot-collab/Network/tool.gd" id="1_rohmq"]
+
+[node name="Users" type="Node"]
+script = ExtResource("1_rohmq")

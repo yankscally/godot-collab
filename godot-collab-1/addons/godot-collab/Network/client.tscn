@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://cmyo7pm2hbvr4"]
+
+[ext_resource type="Script" path="res://addons/godot-collab/Network/client.gd" id="1_o030h"]
+
+[node name="client" type="Node"]
+process_mode = 3
+script = ExtResource("1_o030h")
+
+[node name="Timer" type="Timer" parent="."]
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

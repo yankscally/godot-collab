@@ -1,5 +1,6 @@
+@tool
 extends EditorPlugin
-
+var collab_tool
 var SERVER_IP = null
 var SERVER_PORT = null
 var is_loaded = false
@@ -9,29 +10,46 @@ var status = -1
 var MAX_PLAYERS = 100
 var host = null
 var node = null
-var connected_users = {}
+var client = preload("res://addons/godot-collab/Network/client.tscn")
+var user_pak = preload("res://addons/godot-collab/Network/Users.tscn")
+var connected_users 
+var user_list = {}
 var timer
 var lat = 0
+
+
+func spawn_user(id):
+	var new_client = client.instantiate()
+	new_client.peer_id = id
+	new_client.collab_tool = collab_tool
+	user_list[str(id)] = new_client
+	connected_users.spawn_user(new_client)
+
 ## custom mp api node root fix
 func add_node(tool):
+	collab_tool = tool
 	if node != null:
-		if node.name in get_editor_interface().get_base_control().get_children():
+		if node in get_editor_interface().get_base_control().get_children():
 			node.queue_free()
 	else:
-		if "godotcolabpluginmp" in get_editor_interface().get_base_control().get_children():
-			get_editor_interface().get_base_control().get_node("godotcolabpluginmp").queue_free()
+		for each in get_editor_interface().get_base_control().get_children():
+			if each.name == "godotcolabpluginmp":
+				each.queue_free()
 	node = Node.new()
+	connected_users = user_pak.instantiate()
 	node.set_meta("tool", tool)
 	node.set_script(load("res://addons/godot-collab/rpc.gd"))
 	node.name = "godotcolabpluginmp"
 	get_editor_interface().get_base_control().add_child(node)
 	mpapi.set_root_path(node.get_path())
+	node.add_child(connected_users)
 
 ###
 func _load(ip,port,is_server,tool):
 	mpapi = MultiplayerAPI.create_default_interface()
 	is_loaded = true
 	SERVER_PORT = int(port)
+	add_node(tool)
 	if is_server == false:
 		SERVER_IP = str(ip)
 		mpapi.connected_to_server.connect(_client_connected)
@@ -42,20 +60,8 @@ func _load(ip,port,is_server,tool):
 		mpapi.peer_connected.connect(_editor_connected)
 		mpapi.peer_disconnected.connect(_editor_disconnected)
 		create_server()
-	add_node(tool)
-	if node != null and is_server == true:
-		var beat = node.get_node_or_null("HeartBeat")
-		if beat != null:
-			beat.queue_free()
-		timer = Timer.new()
-		timer.name = "HeartBeat"
-		timer.wait_time = 2.0
-		timer.connect("timeout", heartbeat)
-		timer.set_one_shot(false)
-		timer.set_timer_process_callback(1)
-		timer.set_one_shot(true)
-		timer.set_autostart(true)
-		node.add_child(timer)
+		_editor_connected(1)
+
 #####  client
 func connect_to_server():
 	if host != null:
@@ -63,19 +69,17 @@ func connect_to_server():
 	host = ENetMultiplayerPeer.new()
 	host.create_client(SERVER_IP, SERVER_PORT)
 	mpapi.set_multiplayer_peer(host)
-	id = mpapi.get_unique_id()
 
 func _client_connected():
 	print("Connected OK!")
 	status = 2
+	id = mpapi.get_unique_id()
+	spawn_user(id)
 
 func _client_disconnected():
 	print("Sever Disconnected")
 	status = 0
-	timer.set_paused(true)
-	print("timer paused")
 
-##### server
 func create_server():
 	if host != null:
 		host = null
@@ -88,42 +92,14 @@ func create_server():
 	#	load("res://cert.crt")
 	#)
 	mpapi.set_multiplayer_peer(host)
-	print("server started on: ")
+	print("server started")
+	id = mpapi.get_unique_id()
 
 func _editor_connected(id):
 	print("Editor Connected: " + str(id))
-	connected_users[str(id)] = {
-		"id": str(id),
-		"name": "Unknown",
-		"Colour": "",
-	}
-	if timer.is_stopped() == true:
-		timer.start()
-	elif timer.is_paused() == true:
-		timer.set_paused(false)
-	mpapi.rpc(0, node, "provide_all_editors", [connected_users])
-	mpapi.rpc(0, node, "announce_new_editor", [connected_users[str(id)]])
+	spawn_user(id)
 
 func _editor_disconnected(id):
 	print("Editor Disconnected "  + str(id))
-	connected_users.erase(str(id))
-	if len(connected_users) <= 1:
-		timer.set_paused(true)
-		print("timer paused")
-	mpapi.rpc(0, node, "announce_editor_gone", [str(id)])
-
-func heartbeat():
-	if len(connected_users) > 1:
-		for user in connected_users:
-			if user != "1":
-				connected_users[user]["beat"] = Time.get_ticks_msec()
-				if connected_users[user]["name"] == "Unknown":
-					mpapi.rpc(int(user), node, "request_user_info")
-				if "latency" in connected_users[user]:
-					mpapi.rpc(int(user), node, "repeater", [connected_users[user]["latency"]])
-				else:
-					mpapi.rpc(int(user), node, "repeater", [-1])
-	if timer.is_stopped() == true:
-		timer.start()
-	elif timer.is_paused() == true:
-		timer.set_paused(false)
+	if str(id) in user_list:
+		user_list[str(id)].queue_free()

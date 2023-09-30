@@ -8,6 +8,10 @@ var colab_tool = null
 var server = false
 var started = false
 var colour = ""
+
+func _ready():
+	$HostSync.visible = false
+
 func _on_ip_address_text_changed():
 	ip = $ip_address.text
 
@@ -32,6 +36,7 @@ func _on_start_pressed():
 			child.visible = false
 		$start.text = "Stop"
 	$start.visible = true
+	$HostSync.visible = true
 	colab_tool.dock_start(server,ip,port,user,colour,started)
 
 
@@ -45,3 +50,7 @@ func _on_port_text_changed():
 
 func _on_useri_text_changed():
 	user = $useri.text
+
+
+func _on_host_sync_pressed():
+	colab_tool.editor.host_sync_files()
